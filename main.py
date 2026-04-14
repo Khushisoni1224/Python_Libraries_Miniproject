@@ -18,3 +18,5 @@ with tab3:
     show_matplotlib()
 with tab4:
     show_pandas()
+
+#python -m streamlit run main.py
