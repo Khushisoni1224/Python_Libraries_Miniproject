@@ -12,17 +12,56 @@ def show_matplotlib():
         "Multiple Lines"
     ])
 
-    x = st.text_input("Enter X values (comma separated)")
+    # -------- COMMON INPUTS --------
+    title = st.text_input("Enter Graph Title", value=chart)
+    xlabel = st.text_input("Enter X-axis Label")
+    ylabel = st.text_input("Enter Y-axis Label")
+
+    # -------- CONDITIONAL INPUTS --------
+    x = None
+    y = None
+
+    if chart != "Histogram":
+        x = st.text_input("Enter X values (comma separated)")
+    
     y = st.text_input("Enter Y values (comma separated)")
 
+    # -------- INPUT PARSER --------
+    def parse_input(data):
+        try:
+            return list(map(float, data.split(",")))
+        except:
+            return None
+
+    x_vals = parse_input(x) if x else None
+    y_vals = parse_input(y) if y else None
+
+    # -------- VALIDATION --------
+    def validate():
+        if y_vals is None:
+            st.error("❌ Invalid Y values")
+            return False
+
+        if chart != "Histogram":
+            if x_vals is None:
+                st.error("❌ Invalid X values")
+                return False
+            if len(x_vals) != len(y_vals):
+                st.error("❌ X and Y must have same length")
+                return False
+
+        return True
+
+    # -------- PLOT --------
     if st.button("Plot Graph", key=f"plot_{chart}"):
-        x_vals = list(map(int, x.split(",")))
-        y_vals = list(map(int, y.split(",")))
+
+        if not validate():
+            return
 
         plt.figure()
 
         if chart == "Line Chart":
-            plt.plot(x_vals, y_vals)
+            plt.plot(x_vals, y_vals, marker='o')
 
         elif chart == "Bar Chart":
             plt.bar(x_vals, y_vals)
@@ -31,49 +70,110 @@ def show_matplotlib():
             plt.pie(y_vals, labels=x_vals, autopct='%1.1f%%')
 
         elif chart == "Histogram":
-            plt.hist(y_vals)
+            plt.hist(y_vals, bins=5)
 
         elif chart == "Multiple Lines":
-            plt.plot(x_vals, y_vals)
-            plt.plot(x_vals, [i*2 for i in y_vals])
+            plt.plot(x_vals, y_vals, label="Line 1")
+            plt.plot(x_vals, [i*2 for i in y_vals], label="Line 2")
+            plt.legend()
 
-        plt.title(chart)
+        # -------- LABELS --------
+        plt.title(title)
+
+        if chart != "Pie Chart":
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
+
+        plt.grid(True)
         st.pyplot(plt)
 
-    # -------- GET CODE --------
+    # -------- DYNAMIC GET CODE --------
     if st.button("Get Code", key=f"code_{chart}"):
+
+        if not validate():
+            return
+
+        code = ""
+
         if chart == "Line Chart":
-            st.code("""
+            code = f"""
 import matplotlib.pyplot as plt
-x = [1,2,3]
-y = [4,5,6]
-plt.plot(x, y)
+
+x = {x_vals}
+y = {y_vals}
+
+plt.plot(x, y, marker='o')
+plt.title("{title}")
+plt.xlabel("{xlabel}")
+plt.ylabel("{ylabel}")
+plt.grid(True)
 plt.show()
-""")
+"""
 
         elif chart == "Bar Chart":
-            st.code("""
-plt.bar([1,2,3], [4,5,6])
+            code = f"""
+import matplotlib.pyplot as plt
+
+x = {x_vals}
+y = {y_vals}
+
+plt.bar(x, y)
+plt.title("{title}")
+plt.xlabel("{xlabel}")
+plt.ylabel("{ylabel}")
+plt.grid(True)
 plt.show()
-""")
+"""
 
         elif chart == "Pie Chart":
-            st.code("""
-plt.pie([30,40,30], labels=["A","B","C"], autopct='%1.1f%%')
+            code = f"""
+import matplotlib.pyplot as plt
+
+labels = {x_vals}
+sizes = {y_vals}
+
+plt.pie(sizes, labels=labels, autopct='%1.1f%%')
+plt.title("{title}")
 plt.show()
-""")
+"""
 
         elif chart == "Histogram":
-            st.code("""
-plt.hist([1,2,2,3,3,3])
+            code = f"""
+import matplotlib.pyplot as plt
+
+data = {y_vals}
+
+plt.hist(data, bins=5)
+plt.title("{title}")
+plt.xlabel("{xlabel}")
+plt.ylabel("{ylabel}")
+plt.grid(True)
 plt.show()
-""")
+"""
 
         elif chart == "Multiple Lines":
-            st.code("""
-x = [1,2,3]
-y = [2,4,6]
-plt.plot(x, y)
-plt.plot(x, [i*2 for i in y])
+            code = f"""
+import matplotlib.pyplot as plt
+
+x = {x_vals}
+y = {y_vals}
+
+plt.plot(x, y, label="Line 1")
+plt.plot(x, [i*2 for i in y], label="Line 2")
+
+plt.title("{title}")
+plt.xlabel("{xlabel}")
+plt.ylabel("{ylabel}")
+plt.legend()
+plt.grid(True)
 plt.show()
-""")
+"""
+
+        st.code(code, language="python")
+
+        # -------- DOWNLOAD BUTTON --------
+        st.download_button(
+            "⬇ Download Code",
+            code,
+            file_name="matplotlib_plot.py"
+        )
