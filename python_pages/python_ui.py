@@ -34,7 +34,7 @@ def show_python():
             b = st.number_input("B", key="l3_b")
             c = st.number_input("C", key="l3_c")
             if st.button("Run", key="run_l3"):
-                st.success(largest_of_three(a,b,c))
+                st.success(largest_of_three(a, b, c))
             if st.button("Show Code", key="code_l3"):
                 st.code("print(max(a, b, c))")
 
@@ -93,7 +93,9 @@ def show_python():
             elif example == "Fibonacci":
                 st.write(fibonacci(n))
             elif example == "Calculator":
-                st.write(calculator(n))
+                result = calculator(n)
+                for k, v in result.items():
+                    st.write(f"{k}: {v}")
 
         if st.button("Show Code", key=f"code_func_{example}"):
             st.code("def function(n):\n    return n*n")
@@ -103,7 +105,15 @@ def show_python():
         data = st.text_input("Enter numbers (comma separated)", key="ds_data")
 
         if st.button("Run", key="run_ds"):
-            lst = list(map(int, data.split(",")))
+            if data.strip() == "":
+                st.error("Enter values.")
+                return
+            try:
+                lst = [int(x.strip()) for x in data.split(",")]
+            except:
+                st.error("Invalid input. Enter numbers like: 1, 2, 3")
+                return
+
             st.write(list_operations(lst))
             st.write("Sum:", list_sum(lst))
             st.write("Unique:", remove_duplicates(lst))
@@ -113,18 +123,24 @@ def show_python():
 
     # -------- FILE HANDLING --------
     elif concept == "File Handling":
-        st.subheader("📂 File Handling")
-
         option = st.selectbox("Choose Operation", [
             "Write File", "Read File", "Append File", "Count Words"
         ])
 
-        filename = st.text_input("Enter file name", key="file_name")
+        filename = st.text_input("Enter file name")
 
         if option in ["Write File", "Append File"]:
-            content = st.text_area("Enter content", key="file_content")
+            content = st.text_area("Enter content")
 
-        if st.button("Run File Operation", key=f"run_file_{option}"):
+        if st.button("Run File Operation"):
+            if filename.strip() == "":
+                st.error("Enter file name.")
+                return
+
+            if option in ["Write File", "Append File"] and content.strip() == "":
+                st.error("Enter content.")
+                return
+
             if option == "Write File":
                 st.success(write_file(filename, content))
             elif option == "Read File":
@@ -134,37 +150,43 @@ def show_python():
             elif option == "Count Words":
                 st.success(count_words(filename))
 
-        if st.button("Show Code", key=f"code_file_{option}"):
+        if st.button("Show Code"):
             st.code("with open('file.txt','r') as f:\n    print(f.read())")
 
     # -------- ERROR HANDLING --------
     elif concept == "Error Handling":
-        st.subheader("⚠️ Error Handling")
-
         example = st.selectbox("Choose Example", [
             "Safe Division", "List Access", "String to Integer"
         ])
 
         if example == "Safe Division":
-            a = st.number_input("Numerator", key="div_a")
-            b = st.number_input("Denominator", key="div_b")
+            a = st.number_input("Numerator")
+            b = st.number_input("Denominator")
 
-            if st.button("Divide", key="run_div"):
+            if st.button("Divide"):
                 st.success(safe_division(a, b))
 
         elif example == "List Access":
-            data = st.text_input("Enter list", key="list_data")
-            index = st.number_input("Index", min_value=0, key="list_index")
+            data = st.text_input("Enter list")
+            index = st.number_input("Index", min_value=0)
 
-            if st.button("Access", key="run_access"):
-                lst = list(map(int, data.split(",")))
+            if st.button("Access"):
+                if data.strip() == "":
+                    st.error("Enter list values.")
+                    return
+                try:
+                    lst = [int(x.strip()) for x in data.split(",")]
+                except:
+                    st.error("Invalid list. Enter numbers like: 1, 2, 3")
+                    return
+
                 st.success(safe_list_access(lst, index))
 
         elif example == "String to Integer":
-            value = st.text_input("Enter value", key="str_val")
+            value = st.text_input("Enter value")
 
-            if st.button("Convert", key="run_convert"):
+            if st.button("Convert"):
                 st.success(string_to_int(value))
 
-        if st.button("Show Code", key=f"code_error_{example}"):
+        if st.button("Show Code"):
             st.code("try:\n    result = a/b\nexcept ZeroDivisionError:\n    print('Error')")

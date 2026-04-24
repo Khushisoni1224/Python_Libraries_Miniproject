@@ -13,7 +13,6 @@ with tab1:
 
 with tab2:
     show_numpy()
-
 with tab3:
     show_matplotlib()
 with tab4:

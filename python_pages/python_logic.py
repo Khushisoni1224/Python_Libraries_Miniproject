@@ -40,7 +40,7 @@ def star_pattern(n):
 def is_prime(n):
     if n <= 1:
         return "Not Prime"
-    for i in range(2, n):
+    for i in range(2, int(n**0.5) + 1):
         if n % i == 0:
             return "Not Prime"
     return "Prime"
@@ -66,9 +66,9 @@ def fibonacci(n):
 
 def calculator(n):
     return {
-        "Double": n*2,
-        "Square": n*n,
-        "Half": n/2
+        "Double": n * 2,
+        "Square": n * n,
+        "Half": n / 2
     }
 
 

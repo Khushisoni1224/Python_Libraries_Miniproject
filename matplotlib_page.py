@@ -12,47 +12,48 @@ def show_matplotlib():
         "Multiple Lines"
     ])
 
-    # -------- COMMON INPUTS --------
     title = st.text_input("Enter Graph Title", value=chart)
     xlabel = st.text_input("Enter X-axis Label")
     ylabel = st.text_input("Enter Y-axis Label")
 
-    # -------- CONDITIONAL INPUTS --------
     x = None
     y = None
 
     if chart != "Histogram":
-        x = st.text_input("Enter X values (comma separated)")
-    
-    y = st.text_input("Enter Y values (comma separated)")
+        x = st.text_input("Enter X values (comma separated)", placeholder="e.g. 1, 2, 3")
 
-    # -------- INPUT PARSER --------
+    y = st.text_input("Enter Y values (comma separated)", placeholder="e.g. 10, 20, 30")
+
     def parse_input(data):
+        if data is None or data.strip() == "":
+            return None
         try:
-            return list(map(float, data.split(",")))
+            return [float(i.strip()) for i in data.split(",")]
         except:
             return None
 
-    x_vals = parse_input(x) if x else None
-    y_vals = parse_input(y) if y else None
+    x_vals = parse_input(x)
+    y_vals = parse_input(y)
 
-    # -------- VALIDATION --------
     def validate():
         if y_vals is None:
-            st.error("❌ Invalid Y values")
+            st.error("Enter valid Y values.")
             return False
 
         if chart != "Histogram":
             if x_vals is None:
-                st.error("❌ Invalid X values")
+                st.error("Enter valid X values.")
                 return False
             if len(x_vals) != len(y_vals):
-                st.error("❌ X and Y must have same length")
+                st.error("X and Y must have same number of values.")
                 return False
+
+        if chart == "Pie Chart" and x_vals is None:
+            st.error("Enter labels for pie chart.")
+            return False
 
         return True
 
-    # -------- PLOT --------
     if st.button("Plot Graph", key=f"plot_{chart}"):
 
         if not validate():
@@ -74,10 +75,9 @@ def show_matplotlib():
 
         elif chart == "Multiple Lines":
             plt.plot(x_vals, y_vals, label="Line 1")
-            plt.plot(x_vals, [i*2 for i in y_vals], label="Line 2")
+            plt.plot(x_vals, [i * 2 for i in y_vals], label="Line 2")
             plt.legend()
 
-        # -------- LABELS --------
         plt.title(title)
 
         if chart != "Pie Chart":
@@ -87,7 +87,6 @@ def show_matplotlib():
         plt.grid(True)
         st.pyplot(plt)
 
-    # -------- DYNAMIC GET CODE --------
     if st.button("Get Code", key=f"code_{chart}"):
 
         if not validate():
@@ -171,7 +170,6 @@ plt.show()
 
         st.code(code, language="python")
 
-        # -------- DOWNLOAD BUTTON --------
         st.download_button(
             "⬇ Download Code",
             code,
